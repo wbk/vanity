@@ -153,8 +153,7 @@ module Vanity
       when Numeric
         values = [args]
       end
-        identity = Vanity.context.vanity_identity rescue nil
-      [timestamp || Time.now, identity, values || [1]]
+      [timestamp || Time.now, identity || (Vanity.context.vanity_identity rescue nil), values || [1]]
     end
     protected :track_args
 

@@ -138,7 +138,7 @@ module Vanity
       return unless @playground.collecting?
       timestamp, identity, values = track_args(args)
       connection.metric_track @id, timestamp, identity, values
-      @playground.logger.info "vanity: #{@id} with value #{values.join(", ")}"
+      @playground.logger.info "vanity: #{@id} with value #{values.join(", ")} and identity #{identity}"
       call_hooks timestamp, identity, values
     end
 

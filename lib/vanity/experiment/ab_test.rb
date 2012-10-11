@@ -449,8 +449,8 @@ module Vanity
         end
 
         if identity
-          index = alternative_for(identity)
-          connection.ab_add_conversion @id, index, identity, count
+          index = (connection.ab_showing(@id, identity) || alternative_for(identity))
+          connection.ab_add_conversion @id, index, identity, count, true
           check_completion!
         end
       end

@@ -450,7 +450,7 @@ module Vanity
 
         if identity
           index = (connection.ab_showing(@id, identity) || alternative_for(identity))
-          connection.ab_add_conversion @id, index, identity, count, true
+          connection.ab_add_conversion @id, index, identity, count, true unless index.nil?
           check_completion!
         end
       end

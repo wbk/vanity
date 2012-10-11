@@ -448,7 +448,6 @@ module Vanity
             identity() rescue nil
         end
         if identity
-          return if connection.ab_showing(@id, identity)
           index = alternative_for(identity)
           connection.ab_add_conversion @id, index, identity, count
           check_completion!

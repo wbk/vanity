@@ -441,14 +441,14 @@ module Vanity
       # Called when tracking associated metric.
       def track!(metric_id, timestamp, count, *args)
         return unless active?
-        identity = case args
+        identity = case (args.first rescue nil)
           when Hash
-            args[:identity] || identity() rescue nil
+            args.first[:identity] || identity() rescue nil
           else
             identity() rescue nil
         end
+
         if identity
-          return if connection.ab_showing(@id, identity)
           index = alternative_for(identity)
           connection.ab_add_conversion @id, index, identity, count
           check_completion!

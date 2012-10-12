@@ -143,6 +143,7 @@ module Vanity
       
       if @track_uniquely == true && connection.metric_conversions_for(@id, identity) > 0
         @playground.logger.info "vanity: not tracking #{@id} with value #{values.join(", ")} and identity #{identity} - already converted this identity"
+        return
       end
 
       connection.metric_track @id, timestamp, identity, values

@@ -24,6 +24,7 @@ module Vanity
       class VanityMetric < VanityRecord
         self.table_name = :vanity_metrics
         has_many :vanity_metric_values
+        has_many :vanity_metric_conversions
 
         def self.retrieve(metric)
           find_or_create_by_metric_id(metric.to_s)
@@ -33,6 +34,12 @@ module Vanity
       # Metric value
       class VanityMetricValue < VanityRecord
         self.table_name = :vanity_metric_values
+        belongs_to :vanity_metric
+      end
+
+      # Metric conversions
+      class VanityMetricConversion < VanityRecord
+        self.table_name = :vanity_metric_conversions
         belongs_to :vanity_metric
       end
 
@@ -111,9 +118,13 @@ module Vanity
       def metric_track(metric, timestamp, identity, values)
         record = VanityMetric.retrieve(metric)
 
+        int total = 0
         values.each_with_index do |value, index|
           record.vanity_metric_values.create(:date => timestamp.to_date.to_s, :index => index, :value => value)
+          total += value
         end
+
+        record.vanity_metric_conversions.find_or_create_by_identity(identity).value += total
 
         record.updated_at = Time.now
         record.save
@@ -144,6 +155,11 @@ module Vanity
       def destroy_metric(metric)
         record = VanityMetric.find_by_metric_id(metric.to_s)
         record && record.destroy
+      end
+
+      def metric_conversions_for(metric, identity)
+          record = VanityMetric.retrieve(metric)
+          record.vanity_metric_conversions.find_or_create_by_identity(identity).value || 0
       end
 
       # Store when experiment was created (do not write over existing value).

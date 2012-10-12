@@ -52,10 +52,15 @@ module Vanity
       def metric_track(metric, timestamp, identity, values)
         @metrics[metric] ||= {}
         current = @metrics[metric][timestamp.to_date] ||= []
+        total = 0
         values.each_with_index do |v,i|
           current[i] = (current[i] || 0) + v || 0
+          total += v
         end
         @metrics[metric][:last_update_at] = Time.now
+        @metrics[metric][:participants] ||= {}
+        @metrics[metric][:participants][identity] ||= 0
+        @metrics[metric][:participants][identity] += v
       end
 
       def metric_values(metric, from, to)
@@ -67,6 +72,9 @@ module Vanity
         @metrics.delete metric
       end
       
+      def metric_conversions_for(metric, identity)
+        (@metrics[metric][:participants][identity] || 0) rescue 0
+      end
 
       # -- Experiments --
      

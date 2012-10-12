@@ -121,7 +121,10 @@ module Vanity
       @playground, @name = playground, name.to_s
       @id = (id || name.to_s.downcase.gsub(/\W+/, '_')).to_sym
       @hooks = []
+      @track_uniquely = false
     end
+
+
 
 
     # -- Tracking --
@@ -137,6 +140,11 @@ module Vanity
     def track!(args = nil)
       return unless @playground.collecting?
       timestamp, identity, values = track_args(args)
+      
+      if @track_uniquely == true && connection.metric_conversions_for(@id, identity) > 0
+        @playground.logger.info "vanity: not tracking #{@id} with value #{values.join(", ")} and identity #{identity} - already converted this identity"
+      end
+
       connection.metric_track @id, timestamp, identity, values
       @playground.logger.info "vanity: #{@id} with value #{values.join(", ")} and identity #{identity}"
       call_hooks timestamp, identity, values
@@ -218,6 +226,14 @@ module Vanity
       connection.get_metric_last_update_at(@id)
     end
 
+    # -- Track Uniquely --
+
+    # Call this method once when defining an ab_test to avoid tracking multiple
+    # conversions from any single identity
+
+    def track_uniquely
+      @track_uniquely = true
+    end
 
     # -- Storage --
 

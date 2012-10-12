@@ -69,6 +69,7 @@ module Vanity
       def metric_track(metric, timestamp, identity, values)
         values.each_with_index do |v,i|
           @metrics.incrby "#{metric}:#{timestamp.to_date}:value:#{i}", v
+          @metrics.incrby "tracked:#{metric}:#{identity}", v
         end
         @metrics["#{metric}:last_update_at"] = Time.now.to_i
       end
@@ -80,6 +81,11 @@ module Vanity
 
       def destroy_metric(metric)
         @metrics.del *@metrics.keys("#{metric}:*")
+        @metrics.del *@metrics.keys("tracked:#{metric}:*")
+      end
+
+      def metric_conversions_for(metric, identity)
+          @metrics["tracked:#{metric}:#{identity}"] || 0
       end
 
 

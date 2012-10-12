@@ -84,10 +84,13 @@ module Vanity
 
       def metric_track(metric, timestamp, identity, values)
         inc = {}
+        total = 0
         values.each_with_index do |v,i|
           inc["data.#{timestamp.to_date}.#{i}"] = v
+          total += v
         end
         @metrics.update({ :_id=>metric }, { "$inc"=>inc, "$set"=>{ :last_update_at=>Time.now } }, :upsert=>true)
+        @participants.update({ :metric=>metric, :identity=>identity }, { "$inc"=> {:num_conversions => total}}, :upsert=>true)
       end
 
       def metric_values(metric, from, to)
@@ -100,6 +103,10 @@ module Vanity
         @metrics.remove :_id=>metric
       end
       
+      def metric_conversions_for(metric, identity)
+        record = @participants.find_one({ :metric=>metric, :identity=>identity })
+        (record && record['num_conversions']) || 0
+      end
 
       # -- Experiments --
      

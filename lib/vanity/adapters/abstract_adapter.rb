@@ -63,6 +63,10 @@ module Vanity
         fail "Not implemented"
       end
 
+      # Deletes all information about this metric.
+      def metric_conversions_for(metric, identity)
+        fail "Not implemented"
+      end
 
       # -- Experiments --
 

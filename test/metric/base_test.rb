@@ -84,6 +84,8 @@ context "Metric tracking" do
     assert yawns = 2 * cheers
   end
 
+
+
   test "can tell the time" do
     metric "Yawns/sec"
     Timecop.freeze(today - 4) { 4.times { Vanity.playground.track! :yawns_sec } }
@@ -149,6 +151,18 @@ context "Metric tracking" do
     assert_equal [3], Vanity.playground.metric(:many_happy_returns).values(today, today)
     Vanity.playground.metric(:many_happy_returns).destroy!
     assert_equal [0], Vanity.playground.metric(:many_happy_returns).values(today, today)
+  end
+
+  test "track_uniquely only tracks the first conversion for each identity" do
+    metric "Unique Visit" do
+      description "Only one of these per identity should track"
+      track_uniquely
+    end
+
+    Vanity.playground.track! :unique_visit, 1, :identity => "dupe" 
+    Vanity.playground.track! :unique_visit, 1, :identity => "dupe"  
+    Vanity.playground.track! :unique_visit, 1, :identity => "other"
+    assert_equal [2], Vanity.playground.metric(:unique_visit).values(today, today)
   end
 end
 
